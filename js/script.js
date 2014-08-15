@@ -22,7 +22,8 @@ var canvas 	  = document.getElementById('canvas'),
 	speed     = 40,
 	g         = [x, y+(height*2/3)],
 	invert	  = -1,
-	border 	  = "#ffffff";
+	border 	  = "#ffffff",
+	mask 	  = false;
 
 canvas.width  = ww;
 canvas.height = wh;
@@ -30,7 +31,7 @@ ctx.lineWidth   = 1;
 
 //Set the shading colors
 function setColor(){
-	for (var i=1;i<=triangles;i++){
+	for (var i=0;i<=triangles;i++){
 		colors[i] = "rgba("+(colorD[0]+(i*(triangles/6)))+","+(colorD[1]+(i*(triangles/6)))+","+(colorD[2]+(i*(triangles/6)))+",1)";
 	}
 }
@@ -40,15 +41,25 @@ var j = 0, k = 0;
 function draw(){
 
 	ctx.clearRect(0,0,ww,wh);
-	for (var i=1;i<=triangles;i++){
+	ctx.save();
+	
+	for (var i=0;i<=triangles;i++){
 		var nHeight = height-(height/triangles)*i;
 
 		ctx.fillStyle = colors[i];
 		ctx.strokeStyle = border;
 
-		ctx.save();
+		if(mask){
+			ctx.beginPath();
+		    ctx.moveTo(g[0],g[1]-nHeight*2/3);
+			ctx.lineTo(g[0]+nHeight/Math.sqrt(3), g[1]+nHeight*1/3);
+			ctx.lineTo(g[0]-nHeight/Math.sqrt(3), g[1]+nHeight*1/3);
+			ctx.lineTo(g[0],g[1]-nHeight*2/3);
+		    ctx.clip();
+		}
+
 		ctx.translate( g[0],g[1] );
-		ctx.rotate(invert*i*j/(-speed*6));
+		ctx.rotate(invert*i*j/(-speed*80));
 		ctx.translate( -g[0],-g[1] );
 
 		ctx.beginPath();
@@ -61,8 +72,8 @@ function draw(){
 		ctx.closePath();
 
 		
-		ctx.restore();
 	};
+	ctx.restore();
 
 	j++;
 }
@@ -84,6 +95,10 @@ document.getElementById("invert").addEventListener("change", function(){
 	invert = document.getElementById("invert").checked;
 	if(invert)invert=1;
 	else invert = -1;
+});
+document.getElementById("mask").addEventListener("change", function(){
+	mask = document.getElementById("mask").checked;
+	console.log(mask);
 });
 document.getElementById("size").addEventListener("change", function(){
 	size	= this.value;
